@@ -24,6 +24,11 @@
         movl	%esp, %ebp
 
         # Init car
+        call    render_score
+        movb    $0, (paused)
+        movb    $0, (is_over)
+        movb    $0, (curr_key)
+        movb    $0, (score)
         movl    $1930, paddlepos                # Row 1, Col 5 (12*160+5*2)
         movl    $2020, ballpos                  # Row 2, Col 80 (12*160+5*20)
         call    clear_screen
@@ -31,10 +36,6 @@
         call    render_ball
         call    render_walls
         call    render_sidebar
-        call    render_score
-        movb    $0, (paused)
-        movb    $0, (is_over)
-        movb    $0, (curr_key)
 
         # epilogue
         movl	%ebp, %esp
