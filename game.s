@@ -16,6 +16,7 @@
     lost_text:  .asciz  "GAME OVER!"
     paused:     .zero   1
     is_over:    .zero   1
+    wallx:      .zero   4
 
 .text
     init_game:
@@ -28,6 +29,7 @@
         movb    $0, (is_over)
         movb    $0, (curr_key)
         movb    $0, (score)
+        movl    $120, (wallx)
         movl    $1930, paddlepos                # Row 1, Col 5 (12*160+5*2)
         movl    $2020, ballpos                  # Row 2, Col 80 (12*160+5*20)
         call    clear_screen
@@ -212,7 +214,8 @@
 
         cmpl    $10, %edi
         jle     check_paddle_collision
-        cmpl    $118, %edi
+        addl    $2, %edi
+        cmpl    (wallx), %edi
         jge     x_collision
 
         movl    $vga_memory, %eax       # Load VGA
@@ -227,6 +230,10 @@
 
     x_car_collision:
         addl    $1, score
+        subl    $2, (wallx)
+        call    render_walls
+        subl    $2, (wallx)
+        call    render_walls
         call    render_score
 
     x_collision:
@@ -299,37 +306,26 @@
         movl	%esp, %ebp
 
         movl    $vga_memory, %eax       # Load VGA
+        movl    (wallx), %ebx
+        decl    %ebx
 
-        movb    $255, 119(%eax)
-        movb    $255, 279(%eax)
-        movb    $255, 439(%eax)
-        movb    $255, 599(%eax)
-        movb    $255, 759(%eax)
-        movb    $255, 919(%eax)
-        movb    $255, 1079(%eax)
-        movb    $255, 1239(%eax)
-        movb    $255, 1399(%eax)
-        movb    $255, 1559(%eax)
-        movb    $255, 1719(%eax)
-        movb    $255, 1879(%eax)
-        movb    $255, 2039(%eax)
-        movb    $255, 2199(%eax)
-        movb    $255, 2359(%eax)
-        movb    $255, 2519(%eax)
-        movb    $255, 2679(%eax)
-        movb    $255, 2839(%eax)
-        movb    $255, 2999(%eax)
-        movb    $255, 3159(%eax)
-        movb    $255, 3319(%eax)
-        movb    $255, 3479(%eax)
-        movb    $255, 3639(%eax)
-        movb    $255, 3799(%eax)
-        movb    $255, 3959(%eax)
+        addl    %ebx, %eax
+        movb    $255, (%eax)
 
-        # epilogue
-        movl	%ebp, %esp
-        popl	%ebp
-        ret
+        movl    $-1, %ecx
+
+        render_walls_loop:
+            incl    %ecx
+            cmpl    $24, %ecx
+            jge     render_walls_loop_end
+            addl    $160, %eax
+            movb    $255, (%eax)
+            jmp     render_walls_loop
+        render_walls_loop_end:
+            # epilogue
+            movl	%ebp, %esp
+            popl	%ebp
+            ret
 
     render_sidebar:
         # prologue
