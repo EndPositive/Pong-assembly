@@ -1,4 +1,4 @@
-.global render_easter_egg, easter_egg_inputs
+.global init_easter_egg, easter_egg_inputs, render_easter_egg
 
 .equ    UP,     0x1
 .equ    DOWN,   0x2
@@ -6,7 +6,6 @@
 
 .data
     line: .zero 4
-    changed: .zero 1
 
 .text
     t1: .asciz "CONGRATS! YOU FOUND THE EASTER EGG."
@@ -18,97 +17,100 @@
     t7: .asciz "YEAH THAT IS IT. LAME EASTEREGG (T.T)"
     navigation_msg: .asciz  "ESC to go back to main menu."
 
-    render_easter_egg:
-        # prologue
-        pushl   %ebp
-        movl    %esp, %ebp
+    init_easter_egg:
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
 
-        call    clear_screen
-        movl    $3, (line)
+        movl    $3, (line)                  # Write lines of text starting at line 3.
+        call    render_easter_egg           # Render the easter egg
 
-    egg_loop:
-        cmpb    $0, (changed)
-        je      no_screen_clr
-        call    clear_screen
-
-    no_screen_clr:
-        movl    $t1, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        incl    (line)
-        movl    $t2, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        incl    (line)
-        movl    $t3, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        incl    (line)
-        movl    $t4, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        addl    $100, (line)
-        movl    $t5, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        addl    $100, (line)
-        movl    $t6, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        addl    $100, (line)
-        movl    $t7, %edi
-        movl    (line), %edx
-        movl    $10, %ecx
-        call    render_text
-
-        subl    $303, (line)
-
-        movl    $navigation_msg, %edi
-        movl    $21, %edx
-        movl    $10, %ecx
-        call    render_text
-
-        cmpb    $UP, (curr_key)
-        je      text_up
-        cmpb    $DOWN, (curr_key)
-        je      text_down
-        cmpb    $ESC, (curr_key)
-        je      easter_egg_over
-
-        movl    $0, (changed)
-        jmp     egg_loop
-    text_up:
-        cmpl    $-300, (line)
-        jle     egg_loop
-        decl    (line)
-        movl    $1, (changed)
-        jmp     egg_loop
-    text_down:
-        cmpl    $3, (line)
-        jge     egg_loop
-        incl    (line)
-        movl    $1, (changed)
-        jmp     egg_loop
-    easter_egg_over:
-        # epilogue
-        movl    %ebp, %esp
-        popl    %ebp
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret
 
     easter_egg_inputs:
-        cmpb    $4, (curr_key)
-        jne     game_loop
-        call    show_start
-        jmp     game_loop
+        cmpb    $1, (curr_key)              # | If current key is the UP key,
+        je      move_text_up                # | Move text up.
+        cmpb    $2, (curr_key)              # | If current key is the DOWN key,
+        je      move_text_down              # | Move text down.
+        cmpb    $4, (curr_key)              # | If current key is the ESC key,
+        je      show_start                  # | Exit from the easter egg and show start.
+
+        jmp     game_loop                   # Jump back to main loop
+
+    move_text_up:
+        cmpl    $-300, (line)               # | If the bottom of the page is reached,
+        jle     move_done                   # | Disallow move and jump back to the start of the loop.
+
+        decl    (line)                      # Move the text one line up.
+        call    render_easter_egg           # Render the easter egg
+        jmp     move_done                   # Jump to exit
+    move_text_down:
+        cmpl    $3, (line)                  # | If the top of the page is reached,
+        jge     move_done                   # | Disallow move and jump back to the start of the loop.
+
+        incl    (line)                      # Move the text one line down.
+        call    render_easter_egg           # Render the easter egg
+        jmp     move_done                   # Jump to exit
+
+    move_done:
+        movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
+        jmp     game_loop                   # Jump back to main loop
+
+    render_easter_egg:
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
+
+        call    clear_screen                # Clear the screen before rendering new text.
+
+        movl    $t1, %edi                   # \
+        movl    (line), %edx                # | Render text t1 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        incl    (line)                      # Set line pointer to the next line.
+        movl    $t2, %edi                   # \
+        movl    (line), %edx                # | Render text t2 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        incl    (line)                      # Set line pointer to the next line.
+        movl    $t3, %edi                   # \
+        movl    (line), %edx                # | Render text t3 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        incl    (line)                      # Set line pointer to the next line.
+        movl    $t4, %edi                   # \
+        movl    (line), %edx                # | Render text t4 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        addl    $100, (line)                # Add 100 to the line pointer.
+        movl    $t5, %edi                   # \
+        movl    (line), %edx                # | Render text t5 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        addl    $100, (line)                # Add 100 to the line pointer.
+        movl    $t6, %edi                   # \
+        movl    (line), %edx                # | Render text t6 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        addl    $100, (line)                # Add 100 to the line pointer.
+        movl    $t7, %edi                   # \
+        movl    (line), %edx                # | Render text t7 on line at offset 10.
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        subl    $303, (line)                # Subtract 303 from the line pointer to restore it.
+
+        movl    $navigation_msg, %edi       # \
+        movl    $21, %edx                   # | Render text navigation_msg at the bottom of the screen
+        movl    $10, %ecx                   # | at offset 10.
+        call    render_text                 # /
+
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
+        ret
