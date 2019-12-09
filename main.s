@@ -1,4 +1,4 @@
-.global main, clear_screen, game_loop, show_start, show_game, show_easter_egg, show_scores, showing_start, showing_scores, showing_easter_egg, putline, render_text, time, int_string, int_to_string
+.global main, clear_screen, game_loop, show_start, show_game, show_easter_egg, show_scores, showing_start, showing_scores, showing_easter_egg, putline, render_text, tick, int_string, int_to_string
 
 .bss
     int_string:         .zero   20
@@ -6,177 +6,166 @@
     showing_start:      .zero   4
     showing_scores:     .zero   4
     showing_easter_egg: .zero   4
-    time:               .zero   4
+    tick:               .zero   4
 
 .text
     main:
-        # Set the timer frequency to 60Hz
-        pushl   $60
-        call    set_timer_frequency
-        addl    $4, %esp
+        # Set the timer frequency to 60Hz   #\
+        pushl   $60                         # | Bootlib stuff.
+        call    set_timer_frequency         # |
+        addl    $4, %esp                    # |
+                                            # |
+        # Set up VGA stuff                  # |
+        call    color_text_mode             # |
+        call    hide_cursor                 # /
 
-        movl    $-1, balldx
-        movl    $1, balldy
+        movl    $-1, balldx                 # Set horizontal speed for the ball.
+        movl    $1, balldy                  # Set vertical speed for the ball.
 
-        # Set up VGA stuff
-        call    color_text_mode
-        call    hide_cursor
+        call    set_keyboard_handler        # Turn on keyboard detection. See input.s.
 
-        # Set up keyboard
-        call    set_keyboard_handler
+        jmp     show_start                  # Render the start menu and continue into the game loop.
 
-        jmp     show_start
-
+    # Main loop
     game_loop:
-        incl    (time)
+        incl    (tick)                      # Increase tick. Used for timing when the ball must move.
 
-        cmpb    $1, (showing_start)
-        je      start_menu_inputs
+        cmpb    $1, (showing_start)         # | If start menu view is showing,
+        je      start_menu_inputs           # | check for inputs specific to start menu view.
 
-        cmpb    $1, (showing_scores)
-        je      scores_inputs
+        cmpb    $1, (showing_scores)        # | If highscores view is showing,
+        je      scores_inputs               # | check for inputs specific to highscores view.
 
-        cmpb    $1, (showing_easter_egg)
-        je      easter_egg_inputs
+        cmpb    $1, (showing_easter_egg)    # | If easter egg view is showing,
+        je      easter_egg_inputs           # | check for inputs specific to easter egg view.
 
-        call    game
+        call    game                        # If none of the views are showing, show the game view.
 
-        cmpb    $4, (curr_key)
-        je      show_start
+        cmpb    $4, (curr_key)              # | If the ESC key is pressed,
+        je      show_start                  # | Show start menu view.
 
-        jmp     game_loop
+        jmp     game_loop                   # Jumps back to the start of this loop.
 
     show_game:
-        movb    $0, showing_start
-        movb    $0, showing_scores
-        movb    $0, showing_easter_egg
-        movb    $0, curr_key
+        movb    $0, showing_start           # \
+        movb    $0, showing_scores          # | Set which view is currently showing for use in game_loop.
+        movb    $0, showing_easter_egg      # /
+        movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
         call    init_game
         jmp     game_loop
 
     show_start:
-        movb    $1, showing_start
-        movb    $0, showing_scores
-        movb    $0, showing_easter_egg
-        movb    $0, curr_key
+        movb    $1, showing_start           # \
+        movb    $0, showing_scores          # | Set which view is currently showing for use in game_loop.
+        movb    $0, showing_easter_egg      # /
+        movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
         call    render_start_menu
         jmp     game_loop
 
     show_scores:
-        movb    $0, showing_start
-        movb    $1, showing_scores
-        movb    $0, showing_easter_egg
-        movb    $0, curr_key
+        movb    $0, showing_start           # \
+        movb    $1, showing_scores          # | Set which view is currently showing for use in game_loop.
+        movb    $0, showing_easter_egg      # /
+        movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
         call    render_scores
         jmp     game_loop
 
     show_easter_egg:
-        movb    $0, showing_start
-        movb    $0, showing_scores
-        movb    $1, showing_easter_egg
-        movb    $0, curr_key
+        movb    $0, showing_start           # \
+        movb    $0, showing_scores          # | Set which view is currently showing for use in game_loop.
+        movb    $1, showing_easter_egg      # /
+        movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
         call    render_easter_egg
         jmp     game_loop
 
     clear_screen:
-        # prologue
-        pushl	%ebp
-        movl	%esp, %ebp
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
 
         # Clear the screen
-        movb    $' ', %al
-        movb    $0x0F, %ah
-        movl    $25*80, %ecx
-        movl    $vga_memory, %edi
-        cld
-        rep     stosw
+        movb    $' ', %al                   # Set character to none.
+        movb    $0x0F, %ah                  # Set background to black (0) and text to white (F).
+        movl    $25*80, %ecx                # Write above to screen with height=25 and width=80.
+        movl    $vga_memory, %edi           # Load the VGA memory location.
+        rep     stosw                       # Actually write the above to the screen (also hides QEMU console).
 
-        # epilogue
-        movl	%ebp, %esp
-        popl	%ebp
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret
 
     /*
-    edi = string to write
-    edx = line to print chars to
-    ecx = line offset
+    %edi = string to write
+    %edx = line to print chars to
+    %ecx = line offset
     */
     render_text:
-        # prologue
-        pushl   %ebp
-        movl    %esp, %ebp
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
 
-        # find memory address to start writing to (will be in eax)
-        movl    %edx, %eax
-        movl    $160, %ebx
-        movl    $0, %edx
-        mull    %ebx
+        movl    %edx, %eax                  # \
+        movl    $160, %ebx                  # | Find VGA memory address offset to start writing to.
+        movl    $0, %edx                    # | Result will be in %eax.
+        mull    %ebx                        # /
 
-        addl    %ecx, %eax
-        addl    $vga_memory, %eax
+        addl    %ecx, %eax                  # | Add line offset to VGA memory address offset.
+        addl    $vga_memory, %eax           # | Add VGA memory address to offset.
 
     render_text_loop:
-        # move char at (%edi) into vga memory
-        movb    (%edi), %bl
-        movb    %bl, (%eax)
+        movb    (%edi), %bl                 # \
+        movb    %bl, (%eax)                 # | Moves char at (%edi) into VGA memory.
 
         # increment pointers
-        addl    $2, %eax
-        incl    %edi
+        addl    $2, %eax                    # Increment VGA memory address by 2 (cell width=2).
+        incl    %edi                        # Increment string address.
 
-        cmpb    $0, (%edi)                                  # if end reached
-        je      render_text_end                             # exit the loop
-        jmp     render_text_loop                            # else continue the loop
+        cmpb    $0, (%edi)                  # | If end of string reached (char=0),
+        je      render_text_end             # | Exit the loop.
+        jmp     render_text_loop            # | Else jump back to the start of this loop.
 
     render_text_end:
-        # epilogue
-        movl    %ebp, %esp
-        popl    %ebp
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret
 
     /*
-    edi = number
+    %edi = number
     puts the string to write in int_string
     */
     int_to_string:
-        # prologue
-        pushl   %ebp
-        movl    %esp, %ebp
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
 
-        movl    $0, %ecx                                    # use ecx as counter of digits
+        movl    $0, %ecx                    # Use %ecx as counter of digits.
         int_to_string_loop:
-            # divide edi by 10
-            movl    %edi, %eax                              # division has to be done into eax
-            movl    $10, %ebx                               # ebx temp holds 10
-            movl    $0, %edx                                # edx will be the remainder
-            divl    %ebx                                    # eax /= 10; edx = eax % 10
-            addl    $48, %edx                               # convert digit to ascii by adding '0'
+            movl    %edi, %eax              # \
+            movl    $10, %ebx               # | Divide number in %edi by 10.
+            movl    $0, %edx                # | Result will be in %eax.
+            divl    %ebx                    # /
+            addl    $48, %edx               # Convert digit to ascii by adding '0'.
 
-            pushl   %edx                                    # push edx onto the stack
-            incl    %ecx                                    # increment the digit counter
-            movl    %eax, %edi                              # restore the result to edi
+            pushl   %edx                    # Push digit in %edx onto the stack.
+            incl    %ecx                    # Increment the digit counter.
+            movl    %eax, %edi              # Restore the division result to %edi.
 
-            cmpl    $0, %edi                                # if edi has reached 0
-            je      put_int_into_string                     # exit the loop
-            jmp     int_to_string_loop                      # else jump back to the loop start
+            cmpl    $0, %edi                # | If division result has reached 0.
+            je      put_int_into_string     # | Exit the loop.
+            jmp     int_to_string_loop      # | Else jump back to the start of this loop.
 
         put_int_into_string:
-            movl    $int_string, %ebx                       # ebx will point to the string
+            movl    $int_string, %ebx       # %ebx will point to the string where we will store the int.
 
         put_int_into_string_loop:
-            popl    %edx                                    # move the digit from the stack into edx
-            movb    %dl, (%ebx)                             # move the digit into the string
+            popl    %edx                    # Move the digit from the stack into %edx.
+            movb    %dl, (%ebx)             # Move the digit into the string.
 
-            incl    %ebx                                    # increment the string pointer
-            decl    %ecx                                    # decrement the counter
+            incl    %ebx                    # Increment the string pointer
+            decl    %ecx                    # Decrement the digit counter
 
-            cmpl    $0, %ecx                                # if the counter has reached 0
-            jle     int_to_string_end                       # exit the loop
-            jmp     put_int_into_string_loop                # else continue the loop
+            cmpl    $0, %ecx                # | If the counter has reached 0,
+            jle     int_to_string_end       # | Exit the loop.
+            jmp     put_int_into_string_loop# | Else jump back to the start of this loop.
 
     int_to_string_end:
-        movb    $0, (%ebx)                                  # NULL terminate the string
-        # epilogue
-        movl    %ebp, %esp
-        popl    %ebp
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret

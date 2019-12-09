@@ -165,7 +165,7 @@
         ret
 
     ball:
-        cmpl    $5000000, (time)
+        cmpl    $5000000, (tick)
         jge     move_ball
     ball_end:
         # epilogue
@@ -173,7 +173,7 @@
         popl	%ebp
         ret
     move_ball:
-        movl    $0, (time)
+        movl    $0, (tick)
 
         # ecx = ballpos + balldx
         movl    ballpos, %ecx
