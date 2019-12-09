@@ -326,7 +326,7 @@
         call    render_text
 
         movl    $empty_text, %edi
-        movl    $16, %edx
+        movl    $17, %edx
         movl    $126, %ecx
         call    render_text
 
