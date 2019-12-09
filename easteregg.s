@@ -16,6 +16,7 @@
     t5: .asciz "THAT'S LITERALLY IT."
     t6: .asciz "OR IS IT?"
     t7: .asciz "YEAH THAT IS IT. LAME EASTEREGG (T.T)"
+    navigation_msg: .asciz  "ESC to go back to main menu."
 
     render_easter_egg:
         # prologue
@@ -73,6 +74,11 @@
         call    render_text
 
         subl    $303, (line)
+
+        movl    $navigation_msg, %edi
+        movl    $21, %edx
+        movl    $10, %ecx
+        call    render_text
 
         cmpb    $UP, (curr_key)
         je      text_up

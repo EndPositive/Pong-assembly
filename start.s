@@ -7,6 +7,7 @@
     start_msg:          .asciz  "Start game"
     scores_msg:         .asciz  "See high scores"
     easter_egg_msg:     .asciz  "Easter egg"
+    navigation_msg:     .asciz  "UP/DOWN to move selection. SPACE to select."
 .text
     render_start_menu:
         # prologue
@@ -57,6 +58,11 @@
         movl    $easter_egg_msg, %edi
         movl    $7, %edx
         movl    $20, %ecx
+        call    render_text
+
+        movl    $navigation_msg, %edi
+        movl    $21, %edx
+        movl    $10, %ecx
         call    render_text
 
         # epilogue

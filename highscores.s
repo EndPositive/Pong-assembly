@@ -7,6 +7,7 @@
 .text
     scores_text: .asciz "Top scores:"
     dot_text:   .asciz  "."
+    navigation_msg: .asciz  "ESC to go back to main menu."
     render_scores:
         call    clear_screen
 
@@ -57,6 +58,11 @@
             jmp     render_scores_loop
 
         render_scores_loop_end:
+
+        movl    $navigation_msg, %edi
+        movl    $21, %edx
+        movl    $10, %ecx
+        call    render_text
 
         ret
 
