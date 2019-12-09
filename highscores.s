@@ -6,12 +6,13 @@
 
 .text
     scores_text: .asciz "Top scores:"
+    dot_text:   .asciz  "."
     render_scores:
         call    clear_screen
 
         movl    $scores_text, %edi
-        movl    $9, %edx
-        movl    $22, %ecx
+        movl    $3, %edx
+        movl    $10, %ecx
         call    render_text
 
         movl    $-1, %esi
@@ -31,10 +32,28 @@
             call    int_to_string
 
             movl    $int_string, %edi
-            movl    $10, %edx
-            movl    $22, %ecx
+            movl    $5, %edx
+            movl    $16, %ecx
             addl    %esi, %edx
             call    render_text
+
+            incl    %esi
+            movl    %esi, %edi
+            decl    %esi
+            call    int_to_string
+
+            movl    $int_string, %edi
+            movl    $5, %edx
+            movl    $10, %ecx
+            addl    %esi, %edx
+            call    render_text
+
+            movl    $dot_text, %edi
+            movl    $5, %edx
+            movl    $12, %ecx
+            addl    %esi, %edx
+            call    render_text
+
             jmp     render_scores_loop
 
         render_scores_loop_end:

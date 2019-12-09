@@ -23,7 +23,7 @@
         movl    %esp, %ebp
 
         call    clear_screen
-        movl    $10, (line)
+        movl    $3, (line)
 
     egg_loop:
         cmpb    $0, (changed)
@@ -33,43 +33,43 @@
     no_screen_clr:
         movl    $t1, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         incl    (line)
         movl    $t2, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         incl    (line)
         movl    $t3, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         incl    (line)
         movl    $t4, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         addl    $100, (line)
         movl    $t5, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         addl    $100, (line)
         movl    $t6, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         addl    $100, (line)
         movl    $t7, %edi
         movl    (line), %edx
-        movl    $22, %ecx
+        movl    $10, %ecx
         call    render_text
 
         subl    $303, (line)
@@ -84,10 +84,14 @@
         movl    $0, (changed)
         jmp     egg_loop
     text_up:
+        cmpl    $-300, (line)
+        jle     egg_loop
         decl    (line)
         movl    $1, (changed)
         jmp     egg_loop
     text_down:
+        cmpl    $3, (line)
+        jge     egg_loop
         incl    (line)
         movl    $1, (changed)
         jmp     egg_loop

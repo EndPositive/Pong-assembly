@@ -16,47 +16,47 @@
         call    clear_screen
 
         movl    $welcome_msg, %edi
-        movl    $10, %edx
-        movl    $20, %ecx
+        movl    $3, %edx
+        movl    $10, %ecx
         call    render_text
 
-        movb    $'[', vga_memory + 160*13+20
+        movb    $'[', vga_memory + 160*5+10
         cmpb    $0, (start_menu_option)
         jne     start_menu_option_0_disabled
         start_menu_option_0_enabled:
-            movb    $'x', vga_memory + 160*13+22
+            movb    $'x', vga_memory + 160*5+12
         start_menu_option_0_disabled:
-            movb    $']', vga_memory + 160*13+24
+            movb    $']', vga_memory + 160*5+14
 
         movl    $start_msg, %edi
-        movl    $13, %edx
-        movl    $30, %ecx
+        movl    $5, %edx
+        movl    $20, %ecx
         call    render_text
 
-        movb    $'[', vga_memory + 160*14+20
+        movb    $'[', vga_memory + 160*6+10
         cmpb    $1, (start_menu_option)
         jne     start_menu_option_1_disabled
         start_menu_option_1_enabled:
-            movb    $'x', vga_memory + 160*14+22
+            movb    $'x', vga_memory + 160*6+12
         start_menu_option_1_disabled:
-            movb    $']', vga_memory + 160*14+24
+            movb    $']', vga_memory + 160*6+14
 
         movl    $scores_msg, %edi
-        movl    $14, %edx
-        movl    $30, %ecx
+        movl    $6, %edx
+        movl    $20, %ecx
         call    render_text
 
-        movb    $'[', vga_memory + 160*15+20
+        movb    $'[', vga_memory + 160*7+10
         cmpb    $2, (start_menu_option)
         jne     start_menu_option_2_disabled
         start_menu_option_2_enabled:
-            movb    $'x', vga_memory + 160*15+22
+            movb    $'x', vga_memory + 160*7+12
         start_menu_option_2_disabled:
-            movb    $']', vga_memory + 160*15+24
+            movb    $']', vga_memory + 160*7+14
 
         movl    $easter_egg_msg, %edi
-        movl    $15, %edx
-        movl    $30, %ecx
+        movl    $7, %edx
+        movl    $20, %ecx
         call    render_text
 
         # epilogue
