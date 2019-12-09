@@ -112,10 +112,16 @@
         ret
 
     move_paddle_up:
+        call    get_paddle_x
+        cmpl    $1, %eax
+        jle     move_paddle_done
         subl    $160, (paddlepos)
         call    render_paddle
         jmp     move_paddle_done
     move_paddle_down:
+        call    get_paddle_x
+        cmpl    $23, %eax
+        jge     move_paddle_done
         addl    $160, (paddlepos)
         call    render_paddle
         jmp     move_paddle_done
@@ -125,6 +131,16 @@
         # epilogue
         movl	%ebp, %esp
         popl	%ebp
+        ret
+
+    /*
+    returns eax
+    */
+    get_paddle_x:
+        movl    (paddlepos), %eax
+        movl    $160, %ecx
+        movl    $0, %edx
+        divl    %ecx
         ret
 
     render_paddle:
