@@ -24,7 +24,6 @@
         movl	%esp, %ebp
 
         # Init car
-        call    render_score
         movb    $0, (paused)
         movb    $0, (is_over)
         movb    $0, (curr_key)
@@ -36,6 +35,7 @@
         call    render_ball
         call    render_walls
         call    render_sidebar
+        call    render_score
 
         # epilogue
         movl	%ebp, %esp
