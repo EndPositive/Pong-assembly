@@ -2,13 +2,12 @@
 
 .bss
     start_menu_option:  .zero   1
-.data
+.text
     welcome_msg:        .asciz  "Welcome to Pong"
     start_msg:          .asciz  "Start game"
     scores_msg:         .asciz  "See high scores"
     easter_egg_msg:     .asciz  "Easter egg"
     navigation_msg:     .asciz  "UP/DOWN to move selection. SPACE to select."
-.text
     render_start_menu:
         # prologue
         pushl	%ebp
@@ -21,7 +20,24 @@
         movl    $10, %ecx
         call    render_text
 
+        call    render_start_menu_options
+
+        movl    $navigation_msg, %edi
+        movl    $21, %edx
+        movl    $10, %ecx
+        call    render_text
+
+        # epilogue
+        movl	%ebp, %esp
+        popl	%ebp
+        ret
+
+    render_start_menu_options:
+        # prologue
+        pushl	%ebp
+        movl	%esp, %ebp
         movb    $'[', vga_memory + 160*5+10
+        movb    $' ', vga_memory + 160*5+12
         cmpb    $0, (start_menu_option)
         jne     start_menu_option_0_disabled
         start_menu_option_0_enabled:
@@ -35,6 +51,7 @@
         call    render_text
 
         movb    $'[', vga_memory + 160*6+10
+        movb    $' ', vga_memory + 160*6+12
         cmpb    $1, (start_menu_option)
         jne     start_menu_option_1_disabled
         start_menu_option_1_enabled:
@@ -48,6 +65,7 @@
         call    render_text
 
         movb    $'[', vga_memory + 160*7+10
+        movb    $' ', vga_memory + 160*7+12
         cmpb    $2, (start_menu_option)
         jne     start_menu_option_2_disabled
         start_menu_option_2_enabled:
@@ -58,11 +76,6 @@
         movl    $easter_egg_msg, %edi
         movl    $7, %edx
         movl    $20, %ecx
-        call    render_text
-
-        movl    $navigation_msg, %edi
-        movl    $21, %edx
-        movl    $10, %ecx
         call    render_text
 
         # epilogue
@@ -85,7 +98,7 @@
         jmp     move_done
     move_option_up:
         decb    (start_menu_option)
-        call    render_start_menu
+        call    render_start_menu_options
         jmp     move_done
 
     move_down:
@@ -94,7 +107,7 @@
         jmp     move_done
     move_option_down:
         incb    (start_menu_option)
-        call    render_start_menu
+        call    render_start_menu_options
         jmp     move_done
 
     enter:
