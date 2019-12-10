@@ -234,8 +234,11 @@
         addl    $1, score                   # Increase score.
         call    render_score                # Render the new score.
 
+        cmpl    $30, (wallx)                # | If the wall is already on the left most,
+        jle     x_collision                 # | Disallow any more wall moving.
+
         subl    $2, (wallx)                 # \
-        call    render_walls                # | Make the sidebar wall more thicc
+        call    render_walls                # | Make the sidebar wall more thicc.
         subl    $2, (wallx)                 # |
         call    render_walls                # |
         subl    $2, (wallx)                 # |
