@@ -52,6 +52,9 @@
         cmpb    $1, (is_paused)             # | If the game is paused,
         je      game_is_paused              # | jump to game is paused function.
 
+        cmpb    $3, (curr_key)              # | If current key is the SPACE key,
+        je      pause_game                  # | pause the game.
+
         call    paddle_inputs               # Check for UP/DOWN input for the paddle.
         call    ball                        # Move the ball (and do collision checks).
 
@@ -108,6 +111,7 @@
 
     pause_game:
         movb    $1, (is_paused)             # Set paused status to paused.
+        movb    $0, (curr_key)              # Set the pressed key back to none.
 
         call    render_paused_sidebar       # Render paused game text in sidebar
 
