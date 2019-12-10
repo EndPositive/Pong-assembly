@@ -59,7 +59,7 @@
         movb    $0, showing_scores          # | Set which view is currently showing for use in game_loop.
         movb    $0, showing_easter_egg      # /
         movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
-        call    render_start_menu
+        call    init_start_menu
         jmp     game_loop
 
     show_scores:

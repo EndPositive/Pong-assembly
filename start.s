@@ -1,4 +1,4 @@
-.global render_start_menu, start_menu_inputs
+.global init_start_menu, start_menu_inputs
 
 .bss
     start_menu_option:  .zero   1
@@ -8,120 +8,121 @@
     scores_msg:         .asciz  "See high scores"
     easter_egg_msg:     .asciz  "Easter egg"
     navigation_msg:     .asciz  "UP/DOWN to move selection. SPACE to select."
-    render_start_menu:
-        # prologue
-        pushl	%ebp
-        movl	%esp, %ebp
 
-        call    clear_screen
+    init_start_menu:
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
 
-        movl    $welcome_msg, %edi
-        movl    $3, %edx
-        movl    $10, %ecx
-        call    render_text
+        call    render_start_menu
 
-        call    render_start_menu_options
-
-        movl    $navigation_msg, %edi
-        movl    $21, %edx
-        movl    $10, %ecx
-        call    render_text
-
-        # epilogue
-        movl	%ebp, %esp
-        popl	%ebp
-        ret
-
-    render_start_menu_options:
-        # prologue
-        pushl	%ebp
-        movl	%esp, %ebp
-        movb    $'[', vga_memory + 160*5+10
-        movb    $' ', vga_memory + 160*5+12
-        cmpb    $0, (start_menu_option)
-        jne     start_menu_option_0_disabled
-        start_menu_option_0_enabled:
-            movb    $'x', vga_memory + 160*5+12
-        start_menu_option_0_disabled:
-            movb    $']', vga_memory + 160*5+14
-
-        movl    $start_msg, %edi
-        movl    $5, %edx
-        movl    $20, %ecx
-        call    render_text
-
-        movb    $'[', vga_memory + 160*6+10
-        movb    $' ', vga_memory + 160*6+12
-        cmpb    $1, (start_menu_option)
-        jne     start_menu_option_1_disabled
-        start_menu_option_1_enabled:
-            movb    $'x', vga_memory + 160*6+12
-        start_menu_option_1_disabled:
-            movb    $']', vga_memory + 160*6+14
-
-        movl    $scores_msg, %edi
-        movl    $6, %edx
-        movl    $20, %ecx
-        call    render_text
-
-        movb    $'[', vga_memory + 160*7+10
-        movb    $' ', vga_memory + 160*7+12
-        cmpb    $2, (start_menu_option)
-        jne     start_menu_option_2_disabled
-        start_menu_option_2_enabled:
-            movb    $'x', vga_memory + 160*7+12
-        start_menu_option_2_disabled:
-            movb    $']', vga_memory + 160*7+14
-
-        movl    $easter_egg_msg, %edi
-        movl    $7, %edx
-        movl    $20, %ecx
-        call    render_text
-
-        # epilogue
-        movl	%ebp, %esp
-        popl	%ebp
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret
 
     start_menu_inputs:
-        cmpb    $1, (curr_key)
-        je      move_up
-        cmpb    $2, (curr_key)
-        je      move_down
-        cmpb    $3, (curr_key)
-        je      enter
-        jmp     game_loop
+        cmpb    $1, (curr_key)              # | If current key is the UP key,
+        je      move_selection_up           # | Move selection up.
+        cmpb    $2, (curr_key)              # | If current key is the DOWN key,
+        je      move_selection_down         # | Move selection down.
+        cmpb    $3, (curr_key)              # | If current key is the SPACE key,
+        je      select                      # | Show the selected view.
 
-    move_up:
-        cmpb    $0, (start_menu_option)
-        jg      move_option_up
-        jmp     move_done
-    move_option_up:
-        decb    (start_menu_option)
-        call    render_start_menu_options
-        jmp     move_done
+        jmp     game_loop                   # Jump back to main loop
 
-    move_down:
-        cmpb    $2, (start_menu_option)
-        jl      move_option_down
-        jmp     move_done
-    move_option_down:
-        incb    (start_menu_option)
-        call    render_start_menu_options
-        jmp     move_done
+    move_selection_up:
+        cmpb    $0, (start_menu_option)     # | If the current selection is already at the top
+        je      inputs_done                 # | Don't allow move and return to the game loop
+        decb    (start_menu_option)         # | Else move selection up
+        call    render_start_menu_options   # Render the new selection
+        jmp     inputs_done                 # Return back to the game loop
 
-    enter:
-        cmpb    $0, (start_menu_option)
-        je      show_game
-        cmpb    $1, (start_menu_option)
-        je      show_scores
-        cmpb    $2, (start_menu_option)
-        je      show_easter_egg
-        jmp     move_done
+    move_selection_down:
+        cmpb    $2, (start_menu_option)     # | If the current selection is already at the top
+        je      inputs_done                 # | Don't allow move and return to the game loop
+        incb    (start_menu_option)         # | Else move selection down
+        call    render_start_menu_options   # Render the new selection
+        jmp     inputs_done                 # Return back to the game looop
 
-    move_done:
-        movl    $0, curr_key
-        jmp     game_loop
+    inputs_done:
+        movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
+        jmp     game_loop                   # Jump back to main loop
 
-    return:
+    select:
+        cmpb    $0, (start_menu_option)     # | If the current selection is 0 (top)
+        je      show_game                   # | Exit from the start menu and show the game.
+        cmpb    $1, (start_menu_option)     # | If the current selection is 1 (middle)
+        je      show_scores                 # | Exit from the start menu and show the high shores.
+        cmpb    $2, (start_menu_option)     # | If the current selection is 2 (bottom)
+        je      show_easter_egg             # | Exit from the start menu and show the easter egg.
+
+    render_start_menu:
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
+
+        call    clear_screen                # Clear the screen before rendering new text.
+
+        movl    $welcome_msg, %edi          # \
+        movl    $3, %edx                    # | Render text welcome_msg on line 3 at offset 10
+        movl    $10, %ecx                   # |
+        call    render_text                 # /
+
+        call    render_start_menu_options   # Actually render the start menu options
+
+        movl    $navigation_msg, %edi       # \
+        movl    $21, %edx                   # | Render text navigation_msg at the bottom of the screen
+        movl    $10, %ecx                   # | at offset 10.
+        call    render_text                 # /
+
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
+        ret
+
+    render_start_menu_options:
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
+
+        movb    $'[', vga_memory + 160*5+10         # Render '[' on line 5 at offset 10
+        movb    $' ', vga_memory + 160*5+12         # Render ' ' on line 5 at offset 12
+        cmpb    $0, (start_menu_option)             # | If the option is disabled
+        jne     start_menu_option_0_disabled        # | Jump past rendering an 'x'
+        start_menu_option_0_enabled:
+            movb    $'x', vga_memory + 160*5+12     # Render 'x' on line 5 at offset 12
+        start_menu_option_0_disabled:
+            movb    $']', vga_memory + 160*5+14     # Render ']' on line 5 at offset 14
+
+        movl    $start_msg, %edi            # \
+        movl    $5, %edx                    # | Render text start_msg on line 5 at offset 20
+        movl    $20, %ecx                   # |
+        call    render_text                 # /
+
+        movb    $'[', vga_memory + 160*6+10         # Render '[' on line 6 at offset 10
+        movb    $' ', vga_memory + 160*6+12         # Render ' ' on line 6 at offset 12
+        cmpb    $1, (start_menu_option)             # | If the option is disabled
+        jne     start_menu_option_1_disabled        # | Jump past rendering an 'x'
+        start_menu_option_1_enabled:
+            movb    $'x', vga_memory + 160*6+12     # Render 'x' on line 6 at offset 12
+        start_menu_option_1_disabled:
+            movb    $']', vga_memory + 160*6+14     # Render ']' on line 6 at offset 14
+
+        movl    $scores_msg, %edi           # \
+        movl    $6, %edx                    # | Render text scores_msg on line 6 at offset 20
+        movl    $20, %ecx                   # |
+        call    render_text                 # /
+
+        movb    $'[', vga_memory + 160*7+10         # Render '[' on line 7 at offset 10
+        movb    $' ', vga_memory + 160*7+12         # Render ' ' on line 7 at offset 12
+        cmpb    $2, (start_menu_option)             # | If the option is disabled
+        jne     start_menu_option_2_disabled        # | Jump past rendering an 'x'
+        start_menu_option_2_enabled:
+            movb    $'x', vga_memory + 160*7+12     # Render 'x' on line 7 at offset 12
+        start_menu_option_2_disabled:
+            movb    $']', vga_memory + 160*7+14     # Render ']' on line 7 at offset 14
+
+        movl    $easter_egg_msg, %edi       # \
+        movl    $7, %edx                    # | Render text easter_egg_msg on line 7 at offset 20
+        movl    $20, %ecx                   # |
+        call    render_text                 # /
+
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret

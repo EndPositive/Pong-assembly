@@ -40,20 +40,20 @@
 
     move_text_up:
         cmpl    $-300, (line)               # | If the bottom of the page is reached,
-        jle     move_done                   # | Disallow move and jump back to the start of the loop.
+        jle     input_done                  # | Disallow move and jump back to the start of the loop.
 
         decl    (line)                      # Move the text one line up.
         call    render_easter_egg           # Render the easter egg
-        jmp     move_done                   # Jump to exit
+        jmp     input_done                  # Jump to exit
     move_text_down:
         cmpl    $3, (line)                  # | If the top of the page is reached,
-        jge     move_done                   # | Disallow move and jump back to the start of the loop.
+        jge     input_done                  # | Disallow move and jump back to the start of the loop.
 
         incl    (line)                      # Move the text one line down.
         call    render_easter_egg           # Render the easter egg
-        jmp     move_done                   # Jump to exit
+        jmp     input_done                  # Jump to exit
 
-    move_done:
+    input_done:
         movb    $0, curr_key                # Set the pressed key back to none. (prevents ESC loop).
         jmp     game_loop                   # Jump back to main loop
 
