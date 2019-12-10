@@ -234,6 +234,8 @@
         call    render_walls
         subl    $2, (wallx)
         call    render_walls
+        subl    $2, (wallx)
+        call    render_walls
         call    render_score
 
     x_collision:
