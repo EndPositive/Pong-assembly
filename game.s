@@ -13,6 +13,8 @@
     paused_text2:   .asciz  "to continue"
     exit_text1:     .asciz  "Press ESC"
     exit_text2:     .asciz  "to exit"
+    key_text1:      .asciz  "Press UP/DOWN"
+    key_text2:      .asciz  "to move paddle"
     empty_text:     .asciz  "               "
     game_over_text: .asciz  "GAME OVER!"
     is_paused:      .zero   1
@@ -354,20 +356,29 @@
         call    render_text                 # /
 
         movl    $empty_text, %edi           # \
-        movl    $17, %edx                   # | Remove text on line 17 at offset 126.
+        movl    $15, %edx                   # | Remove text on line 17 at offset 126.
         movl    $126, %ecx                  # |
         call    render_text                 # /
 
         movl    $pause_text1, %edi          # \
-        movl    $18, %edx                   # | Render paragraph about pausing the game
+        movl    $16, %edx                   # | Render paragraph about pausing the game
         movl    $126, %ecx                  # | on line 18-19 at offset 126.
         call    render_text                 # |
         movl    $empty_text, %edi           # |
-        movl    $19, %edx                   # |
+        movl    $17, %edx                   # |
         movl    $126, %ecx                  # |
         call    render_text                 # |
         movl    $pause_text2, %edi          # |
-        movl    $19, %edx                   # |
+        movl    $17, %edx                   # |
+        movl    $126, %ecx                  # |
+        call    render_text                 # /
+
+        movl    $key_text1, %edi            # \
+        movl    $19, %edx                   # | Render paragraph about keys
+        movl    $126, %ecx                  # | on line 22-23 at offset 126.
+        call    render_text                 # |
+        movl    $key_text2, %edi            # |
+        movl    $20, %edx                   # |
         movl    $126, %ecx                  # |
         call    render_text                 # /
 
@@ -405,11 +416,11 @@
         movl	%esp, %ebp                  # /
 
         movl    $paused_text1, %edi         # \
-        movl    $17, %edx                   # | Render paragraph about exiting the game
+        movl    $15, %edx                   # | Render paragraph about exiting the game
         movl    $126, %ecx                  # | on line 17 and 19 at offset 126.
         call    render_text                 # |
         movl    $paused_text2, %edi         # |
-        movl    $19, %edx                   # |
+        movl    $17, %edx                   # |
         movl    $126, %ecx                  # |
         call    render_text                 # /
 
