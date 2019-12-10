@@ -27,6 +27,7 @@
         movl    $120, (wallx)               # Wall position starts at offset 120.
         movl    $1930, paddlepos            # Set paddle position to line 1 at offset 5 (12*160+5*2)
         movl    $2020, ballpos              # Set ball position to line 1 at offset 100 (12*160+50*2).
+        movl    $0, (tick)                  # Reset tick counter
 
         call    clear_screen                # Clear the screen before rendering new items
         call    render_paddle               # \
