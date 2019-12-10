@@ -165,7 +165,7 @@
         ret
 
     ball:
-        cmpl    $5000000, (tick)
+        cmpl    $3000000, (tick)
         jge     move_ball
     ball_end:
         # epilogue
