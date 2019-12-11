@@ -7,7 +7,7 @@
     start_msg:          .asciz  "Start game"
     scores_msg:         .asciz  "See high scores"
     easter_egg_msg:     .asciz  "Easter egg"
-    navigation_msg:     .asciz  "UP/DOWN to move selection. SPACE to select."
+    navigation_msg:     .asciz  "UP/DOWN to move selection. ENTER to select."
 
     init_start_menu:
         pushl	%ebp                        # | Prologue.
@@ -24,7 +24,7 @@
         je      move_selection_up           # | Move selection up.
         cmpb    $2, (curr_key)              # | If current key is the DOWN key,
         je      move_selection_down         # | Move selection down.
-        cmpb    $3, (curr_key)              # | If current key is the SPACE key,
+        cmpb    $5, (curr_key)              # | If current key is the ENTER key,
         je      select                      # | Show the selected view.
 
         jmp     game_loop                   # Jump back to main loop
