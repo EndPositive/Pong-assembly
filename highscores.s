@@ -1,4 +1,4 @@
-.global highscores, highscore_count, add_highscore, get_highscore, render_scores, scores_inputs
+.global add_highscore, render_scores
 
 .bss
     highscores: .zero 404

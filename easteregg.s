@@ -1,8 +1,4 @@
-.global init_easter_egg, easter_egg_inputs, render_easter_egg
-
-.equ    UP,     0x1
-.equ    DOWN,   0x2
-.equ    ESC,    0x4
+.global init_easter_egg, easter_egg_inputs
 
 .data
     line: .zero 4

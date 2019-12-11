@@ -1,4 +1,4 @@
-.global paddle, paddlepos, render_paddle, ball, ballpos, render_ball, game, balldx, balldy, render_walls, init_game
+.global init_game, game, balldx, balldy,
 .data
     paddlepos:      .zero   4
     ballpos:        .zero   4

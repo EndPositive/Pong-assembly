@@ -1,8 +1,7 @@
-.global main, clear_screen, game_loop, show_start, show_game, show_easter_egg, show_scores, showing_start, showing_scores, showing_easter_egg, putline, render_text, tick, int_string, int_to_string
+.global main, clear_screen, game_loop, show_start, show_game, show_easter_egg, show_scores, render_text, tick, int_string, int_to_string
 
 .bss
     int_string:         .zero   20
-    state:              .zero   4
     showing_start:      .zero   4
     showing_scores:     .zero   4
     showing_easter_egg: .zero   4
