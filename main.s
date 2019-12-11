@@ -30,19 +30,19 @@
     game_loop:
         incl    (tick)                      # Increase tick. Used for timing when the ball must move.
 
+        cmpb    $4, (curr_key)              # | If the ESC key is pressed,
+        je      show_start                  # | Show start menu view.
+
         cmpb    $1, (showing_start)         # | If start menu view is showing,
         je      start_menu_inputs           # | check for inputs specific to start menu view.
 
         cmpb    $1, (showing_scores)        # | If highscores view is showing,
-        je      scores_inputs               # | check for inputs specific to highscores view.
+        je      game_loop                   # | jump back to the top of this loop (scores view does not have specific inputs).
 
         cmpb    $1, (showing_easter_egg)    # | If easter egg view is showing,
         je      easter_egg_inputs           # | check for inputs specific to easter egg view.
 
         call    game                        # If none of the views are showing, show the game view.
-
-        cmpb    $4, (curr_key)              # | If the ESC key is pressed,
-        je      show_start                  # | Show start menu view.
 
         jmp     game_loop                   # Jumps back to the start of this loop.
 
