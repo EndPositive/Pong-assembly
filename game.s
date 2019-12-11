@@ -17,6 +17,7 @@
     key_text2:      .asciz  "to move paddle"
     empty_text:     .asciz  "               "
     game_over_text: .asciz  "GAME OVER!"
+    restart_text:   .asciz  "to restart"
     is_paused:      .zero   1
     is_over:        .zero   1
 
@@ -25,6 +26,8 @@
         pushl	%ebp                        # | Prologue.
         movl	%esp, %ebp                  # /
 
+        movb    $0, (is_paused)             # Set paused status back to running
+        movb    $0, (is_over)               # Set game over status back to running
         movb    $0, (score)                 # Start game with 0 points.
         movl    $120, (wallx)               # Wall position starts at offset 120.
         movl    $1930, paddlepos            # Set paddle position to line 1 at offset 5 (12*160+5*2)
@@ -71,7 +74,6 @@
         ret
 
     start_new_game:
-        movb    $0, (is_over)               # Set game over status back to running
         movb    $0, curr_key                # Set the pressed key back to none.
 
         call    init_game                   # Initialize a new game.
@@ -81,11 +83,12 @@
         ret
 
     game_over:
-        movb    $1, (is_over)               # Set game over status to game over
-        movl    (score), %edi               # Move the score into %edi
-        call    add_highscore               # Add high score to highscore list
+        movb    $1, (is_over)               # Set game over status to game over.
+        movl    (score), %edi               # Move the score into %edi.
+        call    add_highscore               # Add high score to highscore list.
 
-        call    render_game_over             # Render game over text
+        call    render_game_over            # Render game over text.
+        call    render_issue                # Render ball red & add red line to left wall.
 
         movl	%ebp, %esp                  # \
         popl	%ebp                        # | Epilogue.
@@ -325,6 +328,16 @@
         popl	%ebp                        # | Epilogue.
         ret
 
+    render_issue:
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
+
+
+
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
+        ret
+
     render_walls:
         pushl	%ebp                        # | Prologue.
         movl	%esp, %ebp                  # /
@@ -437,8 +450,37 @@
         movl	%esp, %ebp                  # /
 
         movl    $game_over_text, %edi       # \
-        movl    $10, %edx                   # | Render game_over_text on line 10 at offset 60.
-        movl    $60, %ecx                   # |
+        movl    $15, %edx                   # | Render game_over_text on line 15 at offset 126.
+        movl    $126, %ecx                  # |
+        call    render_text                 # /
+
+        movl    $vga_memory, %eax           # Load the VGA memory location.
+        addl    $2526, %eax                 # Offset by 15*160 + 126
+        incl    %eax
+
+        movb    $64, (%eax)                 # \
+        addl    $2, %eax                    # | Render red background
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # |
+        addl    $2, %eax                    # |
+        movb    $64, (%eax)                 # /
+
+        movl    $restart_text, %edi         # \
+        movl    $17, %edx                   # | Render game_over_text on line 17 at offset 126.
+        movl    $126, %ecx                  # |
         call    render_text                 # /
 
         movl	%ebp, %esp                  # \
