@@ -33,8 +33,6 @@
         je      move_text_up                # | Move text up.
         cmpb    $2, (curr_key)              # | If current key is the DOWN key,
         je      move_text_down              # | Move text down.
-        cmpb    $4, (curr_key)              # | If current key is the ESC key,
-        je      show_start                  # | Exit from the easter egg and show start.
 
         jmp     game_loop                   # Jump back to main loop
 
