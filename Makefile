@@ -1,5 +1,5 @@
-boot.elf: $(wildcard bootlib/*.s *.s)
-	$(CC) -g -nostdlib -m32 -Wl,-Tbootlib/boot.ld -o $@ $^
+boot.elf: $(wildcard bootlib/bootlib/*.s *.s)
+	$(CC) -g -nostdlib -m32 -Wl,-Tbootlib/bootlib/boot.ld -o $@ $^
 
 .PHONY: test
 test: boot.elf
