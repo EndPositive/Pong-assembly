@@ -134,6 +134,8 @@
         pushl	%ebp                        # | Prologue.
         movl	%esp, %ebp                  # /
 
+        movl    $0, (int_string)
+
         movl    $0, %ecx                    # Use %ecx as counter of digits.
         int_to_string_loop:
             movl    %edi, %eax              # \
