@@ -11,47 +11,47 @@
 
 .text
     set_keyboard_handler:
-        pushl   $irq1
-        pushl   $1
-        call    set_irq_handler
-        call    enable_irq
-        addl    $8, %esp
+        pushl	%ebp                        # | Prologue.
+        movl	%esp, %ebp                  # /
+
+        pushl   $irq1                       # \
+        pushl   $1                          # | Bootlib's method in creating a interupt handler.
+        call    set_irq_handler             # |
+        call    enable_irq                  # |
+        addl    $8, %esp                    # /
+
+        movl	%ebp, %esp                  # \
+        popl	%ebp                        # | Epilogue.
         ret
     irq1:
-        pushl   %eax
-
         wait:
-            inb     $0x64, %al
-            test    $1, %al
-            jz      wait
-
-            xor     %eax, %eax
-            inb     $0x60, %al
+            movl    $0, %eax                # Empty %eax
+            inb     $0x60, %al              # Get scancode from keyboard's in and put it into %eax
 
         case_up:
-            cmpb    $UP, %al
-            jne     case_down
-            movb    $1, curr_key
-            jmp     return
+            cmpb    $UP, %al                # | If the scancode does not equal the scancode for UP
+            jne     case_down               # | Jump to the next case.
+            movb    $1, curr_key            # | Else, move 1 into curr_key variable.
+            jmp     return                  # Jump to return as we have found the key.
         case_down:
-            cmpb    $DOWN, %al
-            jne     case_space
-            movb    $2, curr_key
-            jmp     return
+            cmpb    $DOWN, %al              # | If the scancode does not equal the scancode for DOWN
+            jne     case_space              # | Jump to the next case.
+            movb    $2, curr_key            # | Else, move 2 into curr_key variable.
+            jmp     return                  # Jump to return as we have found the key.
         case_space:
-            cmpb    $SPACE, %al
-            jne     case_esc
-            movb    $3, curr_key
-            jmp     return
+            cmpb    $SPACE, %al             # | If the scancode does not equal the scancode for SPACE
+            jne     case_esc                # | Jump to the next case.
+            movb    $3, curr_key            # | Else, move 3 into curr_key variable.
+            jmp     return                  # Jump to return as we have found the key.
         case_esc:
-            cmpb    $ESC, %al
-            jne     case_enter
-            movb    $4, curr_key
+            cmpb    $ESC, %al               # | If the scancode does not equal the scancode for ESC
+            jne     case_enter              # | Jump to the next case.
+            movb    $4, curr_key            # | Else, move 4 into curr_key variable.
+            jmp     return                  # Jump to return as we have found the key.
         case_enter:
-            cmpb    $ENTER, %al
-            jne     return
-            movb    $5, curr_key
+            cmpb    $ENTER, %al             # | If the scancode does not equal the scancode for ENTER
+            jne     return                  # | Jump to the next case.
+            movb    $5, curr_key            # | Else, move 4 into curr_key variable.
         return:
-            movb    $0, %al
-            popl    %eax
-            jmp     end_of_irq1
+            movb    $0, %al                 # No keys were found so clear the scancode.
+            jmp     end_of_irq1             # Exit.
