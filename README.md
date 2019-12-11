@@ -4,7 +4,7 @@ To run pong-assembly, you need to have QEMU and gcc. installed.
 To try pong-assembly, clone the project and include the submodules.
 
 ```sh
-$ git clone --recursive-submodules https://github.com/EndPositive/pong-assembly.git
+$ git clone --recursive https://github.com/EndPositive/pong-assembly.git
 ```
 
 Then run the following command to compile and boot pong-assembly.
