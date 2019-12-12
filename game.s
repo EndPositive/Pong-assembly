@@ -88,7 +88,6 @@
         call    add_highscore               # Add high score to highscore list.
 
         call    render_game_over            # Render game over text.
-        call    render_issue                # Render ball red & add red line to left wall.
 
         movl	%ebp, %esp                  # \
         popl	%ebp                        # | Epilogue.
@@ -323,16 +322,6 @@
         addl    (ballpos), %eax             # Offset by the ball position.
 
         movb    $'O', (%eax)                # Draw a ball.
-
-        movl	%ebp, %esp                  # \
-        popl	%ebp                        # | Epilogue.
-        ret
-
-    render_issue:
-        pushl	%ebp                        # | Prologue.
-        movl	%esp, %ebp                  # /
-
-
 
         movl	%ebp, %esp                  # \
         popl	%ebp                        # | Epilogue.
