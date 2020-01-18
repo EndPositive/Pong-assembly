@@ -1,5 +1,5 @@
 # pong-assembly
-To run pong-assembly, you need to have QEMU and gcc. installed.
+To run pong-assembly, you need to have QEMU and gcc installed.
 
 To try pong-assembly, clone the project and include the submodules.
 
