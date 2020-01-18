@@ -1,4 +1,4 @@
-# pong-assembly
+# Pong-assembly
 Pong-assembly is written in Assembly x86 AT&T. This project includes a menu screen, the actual game, and saves highscores. The game includes a wall moving closer as you get more points.
 
 ![Start menu](https://user-images.githubusercontent.com/25148195/72667769-ae3f4280-3a1f-11ea-8012-962675281752.png)
