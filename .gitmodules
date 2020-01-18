@@ -1,3 +1,6 @@
 [submodule "bootlib"]
 	path = src/bootlib
 	url = https://github.com/m-ou-se/bootlib.git
+[submodule "src/bootlib"]
+	path = src/bootlib
+	url = https://github.com/m-ou-se/bootlib.git
